@@ -8,11 +8,19 @@ import (
 type Config struct {
 	RedditData     RedditData
 	UserEmail      string
+	EmailerConfig  EmailerConfig
 	DailyDigests   []Digest
 	WeeklyWeekday  string //The day of the week to send weekly digest
 	WeeklyDigests  []Digest
 	MonthlyDay     int //The day of the month to send monthly digest
 	MonthlyDigests []Digest
+}
+
+type EmailerConfig struct {
+	URL             string
+	Port            int
+	SendingAddress  string
+	SendingPassword string
 }
 
 type Digest struct {

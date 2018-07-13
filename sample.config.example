@@ -7,6 +7,12 @@
 		"Password": ""
 	},
 	"UserEmail": "test@test.com",
+	"EmailerConfig": {
+		"URL": "",
+		"Port": 587,
+		"SendingAddress": "",
+		"SendingPassword": ""
+	},
 	"DailyDigests": [
 		{
 			"Subreddit": "funny",
