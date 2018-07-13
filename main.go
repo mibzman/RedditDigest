@@ -3,11 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"time"
 )
 
 func main() {
-	Run("mibzman.config")
+	err := Run("mibzman.config")
+	if err != nil {
+		panic(err)
+	}
+	log.Println("sent email")
 	// RunActions()
 }
 
