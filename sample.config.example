@@ -6,7 +6,7 @@
 		"Username": "",
 		"Password": ""
 	},
-	"UserEmail": "test@test.com",
+	"UserEmail": "",
 	"EmailerConfig": {
 		"URL": "",
 		"Port": 587,
@@ -15,11 +15,7 @@
 	},
 	"DailyDigests": [
 		{
-			"Subreddit": "funny",
-			"NumPosts": 5
-		},
-		{
-			"Subreddit": "memes",
+			"Subreddit": "programmerhumor",
 			"NumPosts": 5
 		}
 	],
@@ -28,20 +24,12 @@
 		{
 			"Subreddit": "golang",
 			"NumPosts": 5
-		},
-		{
-			"Subreddit": "cute",
-			"NumPosts": 5
 		}
 	],
 	"MonthlyDay": 1,
 	"MonthlyDigests": [
 		{
-			"Subreddit": "videos",
-			"NumPosts": 5
-		},
-		{
-			"Subreddit": "pics",
+			"Subreddit": "opensource",
 			"NumPosts": 5
 		}
 	]
