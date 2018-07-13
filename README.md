@@ -4,16 +4,23 @@
 
 This tool sends some number of reddit posts from given subreddits at given intervals.
 
-*   hottest posts every day
-*   top weekly every week
-*   top monthly every month
+*   Hottest posts every day
+*   Top weekly every week
+*   Top monthly every month
 
 ### Getting started:
 
-1.  download & build
-2.  fill out `sample.config.example`
-3.  `./RedditDigest sample.config.example`
+1.  Download & Build
+2.  Fill out `sample.config.example`
+3.  Rename the config file to something else.
+4.  `./RedditDigest <your.config>`
 
-Will run the program and send an email to your email address with the configured subs. If the system has an acurate clock, weekly and monthly content will be included on the days specefied.
+Running the program will send an email to your email address with the configured subs. If the system has an acurate clock, weekly and monthly content will be included on the days specefied.
 
-It would be a good idea to rename the config file to something else.
+### Config
+
+UserEmail: The email you want to recieve digests
+RedditData: Info needed for `github.com/turnage/graw`, see [this tutorial](https://turnage.gitbooks.io/graw/content/chapter1.html)
+EmailerConfig: Something to send emails, probably gmail
+WeeklyWeekday: The day of the week on which to send the weekly portion of the digest
+MonthlyDay: The day of the month on which to send the monthly portion of the digest
