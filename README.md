@@ -19,8 +19,8 @@ Running the program will send an email to your email address with the configured
 
 ### Config
 
-UserEmail: The email you want to recieve digests
-RedditData: Info needed for `github.com/turnage/graw`, see [this tutorial](https://turnage.gitbooks.io/graw/content/chapter1.html)
-EmailerConfig: Something to send emails, probably gmail
-WeeklyWeekday: The day of the week on which to send the weekly portion of the digest
-MonthlyDay: The day of the month on which to send the monthly portion of the digest
+*   UserEmail: The email you want to recieve digests
+*   RedditData: Info needed for `github.com/turnage/graw`, see [this tutorial](https://turnage.gitbooks.io/graw/content/chapter1.html)
+*   EmailerConfig: Something to send emails, probably gmail
+*   WeeklyWeekday: The day of the week on which to send the weekly portion of the digest
+*   MonthlyDay: The day of the month on which to send the monthly portion of the digest
