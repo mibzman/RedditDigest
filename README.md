@@ -17,6 +17,8 @@ This tool sends some number of reddit posts from given subreddits at given inter
 
 Running the program will send an email to your email address with the configured subs. If the system has an acurate clock, weekly and monthly content will be included on the days specefied.
 
+The intent is for the program to be run once a day, it will not self-schedule at this time
+
 ### Config
 
 *   UserEmail: The email you want to recieve digests
