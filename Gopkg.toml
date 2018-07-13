@@ -26,6 +26,7 @@
 
 [metadata.heroku]
   root-package = "github.com/mibzman/redditdigest"
+  go-version = "go1.10.3"
 
 [prune]
   go-tests = true
