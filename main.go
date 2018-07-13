@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -34,7 +35,7 @@ func Run(Filename string) error {
 	Email += `<h1>Email Digest for you!</H1> <br></br>`
 
 	for _, Digest := range config.DailyDigests {
-		posts, err := redditBot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts)
+		posts, err := redditBot.GetDailyPostsForSub(Digest.Subreddit, Digest.NumPosts)
 		if err != nil {
 			return err
 		}
@@ -42,19 +43,65 @@ func Run(Filename string) error {
 		Email += fmt.Sprintf(`<br></br><hr></hr> <h2>Today's %v Posts from /r/%v </h2>`, Digest.NumPosts, Digest.Subreddit)
 
 		for _, post := range posts {
-			if post.IsSelf {
-				Email += fmt.Sprintf(`<h3>%v</h3><br></br>`, post.Title)
-				Email += fmt.Sprintf(`%v<br></br>`, post.SelfTextHTML)
-			} else {
-				// Email += fmt.Sprintf("%v", post.IsRedditMediaDomain)
-				Email += fmt.Sprintf(`<a href="%v">%v </a><br></br>`, post.URL, post.Title)
+			result, err := GeneratePostEmailContent(post)
+			if err != nil {
+				return err
+			}
+
+			Email += result
+		}
+	}
+
+	weekday := time.Now().Weekday().String()
+
+	if weekday == config.WeeklyWeekday {
+		Email += "<br></br><br><hr></hr><hr></hr>"
+
+		for _, Digest := range config.WeeklyDigests {
+			posts, err := redditBot.GetWeeklyPostsForSub(Digest.Subreddit, Digest.NumPosts)
+			if err != nil {
+				return err
+			}
+
+			Email += fmt.Sprintf(`<br></br> <h2>This Week's %v Posts from /r/%v </h2>`, Digest.NumPosts, Digest.Subreddit)
+
+			for _, post := range posts {
+				result, err := GeneratePostEmailContent(post)
+				if err != nil {
+					return err
+				}
+
+				Email += result
+			}
+		}
+
+	}
+
+	if time.Now().Day() == config.MonthlyDay {
+		Email += "<br></br><br><hr></hr><hr></hr>"
+
+		for _, Digest := range config.MonthlyDigests {
+			posts, err := redditBot.GetMonthlyPostsForSub(Digest.Subreddit, Digest.NumPosts)
+			if err != nil {
+				return err
+			}
+
+			Email += fmt.Sprintf(`<br></br> <h2>This Months's %v Posts from /r/%v </h2>`, Digest.NumPosts, Digest.Subreddit)
+
+			for _, post := range posts {
+				result, err := GeneratePostEmailContent(post)
+				if err != nil {
+					return err
+				}
+
+				Email += result
 			}
 		}
 	}
 
 	Email += "<br></br><br></br>Stay cool <br></br> -RedditDigest Bot"
 
-	request := EmailRequest{"", config.UserEmail, "Reddit Digest", Email, []string{}}
+	request := EmailRequest{"", config.UserEmail, "Reddit Digest for " + weekday, Email, []string{}}
 
 	return config.EmailerConfig.Email(request)
 

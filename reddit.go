@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -35,18 +36,20 @@ password: "` + data.Password + `"`)
 	return redditBot, err
 }
 
-func (bot RedditBot) GetPostsForSub(sub string, limit int) ([]reddit.Post, error) {
-	harvest, err := bot.Bot.Listing("/r/"+sub, "")
+func (bot RedditBot) GetPostsForSub(sub string, limit int, query string, daysOld int, params map[string]string) ([]reddit.Post, error) {
+	harvest, err := bot.Bot.ListingWithParams("/r/"+sub+query, params)
 	if err != nil {
 		return []reddit.Post{}, err
 	}
 
 	var results []reddit.Post
 
+	// [:limit*2]
+
 	counter := 0
-	for _, post := range harvest.Posts[:limit*2] {
+	for _, post := range harvest.Posts {
 		//skips posts if they're older than a day
-		if time.Unix(int64(post.CreatedUTC), 0).Before(time.Now().AddDate(0, 0, -1)) {
+		if time.Unix(int64(post.CreatedUTC), 0).Before(time.Now().AddDate(0, 0, daysOld*-1)) {
 			continue
 		}
 		results = append(results, *post)
@@ -54,7 +57,42 @@ func (bot RedditBot) GetPostsForSub(sub string, limit int) ([]reddit.Post, error
 		if counter >= limit {
 			break
 		}
-		// fmt.Printf("[%s] posted [%s]\n", post.Author, post.Title)
 	}
 	return results, nil
+}
+
+func (bot RedditBot) GetMonthlyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+	m := make(map[string]string)
+	m["t"] = "month"
+	return bot.GetPostsForSub(sub, limit, "/top", 30, m)
+}
+
+func (bot RedditBot) GetWeeklyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+	m := make(map[string]string)
+	m["t"] = "week"
+	return bot.GetPostsForSub(sub, limit, "/top", 7, m)
+}
+
+func (bot RedditBot) GetDailyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+	m := make(map[string]string)
+	return bot.GetPostsForSub(sub, limit, "", 1, m)
+}
+
+func GeneratePostEmailContent(post reddit.Post) (result string, err error) {
+	if post.IsSelf {
+		result += fmt.Sprintf(`<h3>%v</h3>`, post.Title)
+		result += fmt.Sprintf(`%v<br></br>`, post.SelfTextHTML)
+	} else {
+		// result += fmt.Sprintf("%v", post.IsRedditMediaDomain)
+		switch post.URL[len(post.URL)-3:] {
+		case "jpg":
+			result += fmt.Sprintf(`<h4>%v </h4> <img src="%v" width="500"> </img> <br></br><br></br>`, post.Title, post.URL)
+		case "png":
+			result += fmt.Sprintf(`<h4>%v </h4> <img src="%v" width="500"> </img> <br></br><br></br>`, post.Title, post.URL)
+		default:
+			result += fmt.Sprintf(`<a href="%v">%v </a> <br></br><br></br>`, post.URL, post.Title)
+		}
+
+	}
+	return
 }
