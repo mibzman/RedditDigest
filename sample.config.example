@@ -1,0 +1,42 @@
+{
+	"RedditData": {
+		"UserAgent": "",
+		"ClientID": "",
+		"ClientSecret": "",
+		"Username": "",
+		"Password": ""
+	},
+	"UserEmail": "test@test.com",
+	"DailyDigests": [
+		{
+			"Subreddit": "funny",
+			"NumPosts": 5
+		},
+		{
+			"Subreddit": "memes",
+			"NumPosts": 5
+		}
+	],
+	"WeeklyWeekday": "Monday",
+	"WeeklyDigests": [
+		{
+			"Subreddit": "golang",
+			"NumPosts": 5
+		},
+		{
+			"Subreddit": "cute",
+			"NumPosts": 5
+		}
+	],
+	"MonthlyDay": 1,
+	"MonthlyDigests": [
+		{
+			"Subreddit": "videos",
+			"NumPosts": 5
+		},
+		{
+			"Subreddit": "pics",
+			"NumPosts": 5
+		}
+	]
+}
