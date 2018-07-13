@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	RunActions()
+	Run("mibzman.config")
+	// RunActions()
 }
 
 func RunActions() {
