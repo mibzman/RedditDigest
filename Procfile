@@ -1,1 +1,1 @@
-web: RedditDigest
+web: ./bin/redditdigest
