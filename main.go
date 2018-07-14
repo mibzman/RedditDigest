@@ -5,15 +5,32 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/jasonlvhit/gocron"
 )
 
+var HasRun bool
+
 func main() {
+	HasRun = false
+	gocron.Every(1).Day().At("13:00").Do(RunMibzman)
+
+	for {
+		if HasRun {
+			break
+		}
+
+		time.Sleep(time.Minute)
+	}
+}
+
+func RunMibzman() {
 	err := Run("mibzman.config")
 	if err != nil {
 		panic(err)
 	}
 	log.Println("sent email")
-	// RunActions()
+	HasRun = true
 }
 
 func RunActions() {
