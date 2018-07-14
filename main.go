@@ -20,6 +20,8 @@ func RunActions() {
 			panic(err)
 		}
 		log.Println("sent email")
+	} else {
+		log.Printf("not running because no arg")
 	}
 }
 
