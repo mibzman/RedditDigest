@@ -5,40 +5,21 @@ import (
 	"fmt"
 	"log"
 	"time"
-
-	"github.com/jasonlvhit/gocron"
 )
 
-var HasRun bool
-
 func main() {
-	HasRun = false
-	gocron.Every(1).Day().At("13:00").Do(RunMibzman)
-
-	for {
-		if HasRun {
-			break
-		}
-		log.Println("Waiting to send")
-		time.Sleep(time.Minute)
-	}
-}
-
-func RunMibzman() {
-	err := Run("mibzman.config")
-	if err != nil {
-		panic(err)
-	}
-	log.Println("sent email")
-	HasRun = true
+	RunActions()
 }
 
 func RunActions() {
 	flag.Parse()
 	args := flag.Args()
-	err := Run(args[0])
-	if err != nil {
-		panic(err)
+	if args[0] == "run" {
+		err := Run("mibzman.config")
+		if err != nil {
+			panic(err)
+		}
+		log.Println("sent email")
 	}
 }
 
