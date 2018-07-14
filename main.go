@@ -19,7 +19,7 @@ func main() {
 		if HasRun {
 			break
 		}
-
+		log.Println("Waiting to send")
 		time.Sleep(time.Minute)
 	}
 }
