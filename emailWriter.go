@@ -46,17 +46,28 @@ func WriteEmail(redditBot RedditBot, config Config) error {
 
 }
 
+func (DigestWriter *DigestWriter) writeDigest(postsGetter PostsGetter, Digest Digest, Headline string) (string, error) {
+	var Result string
+
+	Posts, err := postsGetter(Digest)
+	if err != nil {
+		return "", err
+	}
+
+	Result += DigestWriter.headline(Headline, Digest)
+
+	FormattedPosts, err := Posts.toString()
+	if err != nil {
+		return "", err
+	}
+	Result += FormattedPosts
+	return Result, nil
+}
+
 func (DigestWriter *DigestWriter) writeDailyDigests() error {
 	var Result string
 	for _, Digest := range DigestWriter.config.DailyDigests {
-		Posts, err := DigestWriter.redditBot.GetDailyPosts(Digest)
-		if err != nil {
-			return err
-		}
-
-		Result += DigestWriter.headline(DayOfTheWeek(), Digest)
-
-		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		FormattedPosts, err := DigestWriter.writeDigest(DigestWriter.redditBot.GetDailyPosts, Digest, DayOfTheWeek())
 		if err != nil {
 			return err
 		}
@@ -71,14 +82,7 @@ func (DigestWriter *DigestWriter) writeWeeklyDigests() error {
 	var Result string
 
 	for _, Digest := range DigestWriter.config.WeeklyDigests {
-		Posts, err := DigestWriter.redditBot.GetWeeklyPosts(Digest)
-		if err != nil {
-			return err
-		}
-
-		Result += DigestWriter.headline("Week", Digest)
-
-		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		FormattedPosts, err := DigestWriter.writeDigest(DigestWriter.redditBot.GetWeeklyPosts, Digest, "Week")
 		if err != nil {
 			return err
 		}
@@ -93,14 +97,7 @@ func (DigestWriter *DigestWriter) writeMonthlyDigests() error {
 	var Result string
 
 	for _, Digest := range DigestWriter.config.MonthlyDigests {
-		Posts, err := DigestWriter.redditBot.GetMonthlyPosts(Digest)
-		if err != nil {
-			return err
-		}
-
-		Result += DigestWriter.headline("Month", Digest)
-
-		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		FormattedPosts, err := DigestWriter.writeDigest(DigestWriter.redditBot.GetMonthlyPosts, Digest, "Month")
 		if err != nil {
 			return err
 		}
