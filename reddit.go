@@ -12,11 +12,6 @@ type RedditBot struct {
 	Bot reddit.Bot
 }
 
-// type Post struct {
-// 	Title string
-// 	Link string
-// }
-
 func InitReddit(data RedditData) (RedditBot, error) {
 	file, err := os.Create("reddit.config")
 	if err != nil {
@@ -59,27 +54,30 @@ func (bot RedditBot) GetPostsForSub(sub string, limit int, query string, daysOld
 	return results, nil
 }
 
-func (bot RedditBot) GetMonthlyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+type PostsGetter func(string, int) ([]reddit.Post, error)
+
+func (bot RedditBot) GetMonthlyPosts(Digest Digest) ([]reddit.Post, error) {
 	m := make(map[string]string)
 	m["t"] = "month"
-	return bot.GetPostsForSub(sub, limit, "/top", 30, m)
+	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "/top", 30, m)
 }
 
-func (bot RedditBot) GetWeeklyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+func (bot RedditBot) GetWeeklyPosts(Digest Digest) ([]reddit.Post, error) {
 	m := make(map[string]string)
 	m["t"] = "week"
-	return bot.GetPostsForSub(sub, limit, "/top", 7, m)
+	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "/top", 7, m)
 }
 
-func (bot RedditBot) GetDailyPostsForSub(sub string, limit int) ([]reddit.Post, error) {
+func (bot RedditBot) GetDailyPosts(Digest Digest) ([]reddit.Post, error) {
 	m := make(map[string]string)
-	return bot.GetPostsForSub(sub, limit, "", 1, m)
+	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "", 1, m)
 }
 
 func (DigestWriter DigestWriter) postsToString(Posts []reddit.Post) (string, error) {
 	var Result string
 	for _, post := range Posts {
-		PostContent, err := DigestWriter.generatePostEmailContent(post)
+		Post := Post{post}
+		PostContent, err := Post.toString()
 		if err != nil {
 			return "", err
 		}
@@ -89,21 +87,26 @@ func (DigestWriter DigestWriter) postsToString(Posts []reddit.Post) (string, err
 	return Result, nil
 }
 
-func (DigestWriter DigestWriter) generatePostEmailContent(post reddit.Post) (result string, err error) {
-	if post.IsSelf {
-		result += fmt.Sprintf(`<h3>%v</h3>`, post.Title)
-		result += fmt.Sprintf(`%v<br></br>`, post.SelfTextHTML)
+type Post struct {
+	reddit.Post
+}
+
+func (Post Post) toString() (result string, err error) {
+	if Post.IsSelf { //is a self post
+		result += fmt.Sprintf(`<h3>%v</h3>`, Post.Title)
+		result += fmt.Sprintf(`%v<br></br>`, Post.SelfTextHTML)
 	} else {
-		// result += fmt.Sprintf("%v", post.IsRedditMediaDomain)
-		switch post.URL[len(post.URL)-3:] {
-		case "jpg":
-			result += fmt.Sprintf(`<h4>%v </h4> <img src="%v" width="500"> </img> <br></br><br></br>`, post.Title, post.URL)
-		case "png":
-			result += fmt.Sprintf(`<h4>%v </h4> <img src="%v" width="500"> </img> <br></br><br></br>`, post.Title, post.URL)
-		default:
-			result += fmt.Sprintf(`<a href="%v">%v </a> <br></br><br></br>`, post.URL, post.Title)
+		if Post.isImage() {
+			result += fmt.Sprintf(`<h4>%v </h4> <img src="%v" width="500"> </img> <br></br><br></br>`, Post.Title, Post.URL)
+		} else {
+			result += fmt.Sprintf(`<a href="%v">%v </a> <br></br><br></br>`, Post.URL, Post.Title)
 		}
 
 	}
 	return
+}
+
+func (Post Post) isImage() bool {
+	FileExtension := Post.URL[len(Post.URL)-3:]
+	return FileExtension == "jpg" || FileExtension == "png"
 }
