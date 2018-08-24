@@ -1,6 +1,6 @@
 # Reddit Digest
 
-## A simple tool to not browse reddit all the [explative deleted] time
+## A simple tool to not browse reddit all the time
 
 This tool sends some number of reddit posts from given subreddits at given intervals.
 
