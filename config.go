@@ -23,11 +23,6 @@ type EmailerConfig struct {
 	SendingPassword string
 }
 
-type Digest struct {
-	Subreddit string
-	NumPosts  int
-}
-
 type RedditData struct {
 	UserAgent    string
 	ClientID     string
@@ -50,4 +45,20 @@ func Parse(Filename string) (Config, error) {
 	}
 
 	return config, nil
+}
+
+func (data RedditData) CreateAgentFile() error {
+	file, err := os.Create("reddit.config")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	file.WriteString(`user_agent: "` + data.UserAgent + `"
+client_id: "` + data.ClientID + `"
+client_secret: "` + data.ClientSecret + `"
+username: "` + data.Username + `"
+password: "` + data.Password + `"`)
+
+	return nil
 }

@@ -2,22 +2,31 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/turnage/graw/reddit"
 )
 
 type Posts struct {
-	list []reddit.Post
+	list []Post
 }
 
 type Post struct {
 	reddit.Post
 }
 
+func (Posts *Posts) append(post Post) {
+	if len(Posts.list) == 0 {
+		Posts.list = []Post{post}
+	} else {
+		Posts.list = append(Posts.list, post)
+	}
+}
+
 func (Posts Posts) toString() (string, error) {
 	var Result string
-	for _, post := range Posts.list {
-		Post := Post{post}
+	for _, Post := range Posts.list {
+		// Post := Post{post}
 		PostContent, err := Post.toString()
 		if err != nil {
 			return "", err
@@ -46,4 +55,8 @@ func (Post Post) toString() (result string, err error) {
 func (Post Post) isImage() bool {
 	FileExtension := Post.URL[len(Post.URL)-3:]
 	return FileExtension == "jpg" || FileExtension == "png"
+}
+
+func (Post Post) isOlderThan(daysOld int) bool {
+	return time.Unix(int64(Post.CreatedUTC), 0).Before(time.Now().AddDate(0, 0, daysOld*-1))
 }

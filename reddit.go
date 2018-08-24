@@ -1,9 +1,6 @@
 package main
 
 import (
-	"os"
-	"time"
-
 	"github.com/turnage/graw/reddit"
 )
 
@@ -12,62 +9,55 @@ type RedditBot struct {
 }
 
 func InitReddit(data RedditData) (RedditBot, error) {
-	file, err := os.Create("reddit.config")
+	err := data.CreateAgentFile()
 	if err != nil {
 		return RedditBot{}, err
 	}
-	defer file.Close()
 
-	file.WriteString(`user_agent: "` + data.UserAgent + `"
-client_id: "` + data.ClientID + `"
-client_secret: "` + data.ClientSecret + `"
-username: "` + data.Username + `"
-password: "` + data.Password + `"`)
-
-	// var err error
 	var redditBot RedditBot
 	redditBot.Bot, err = reddit.NewBotFromAgentFile("reddit.config", 0)
 	return redditBot, err
 }
 
-func (bot RedditBot) GetPostsForSub(sub string, limit int, query string, daysOld int, params map[string]string) (Posts, error) {
-	harvest, err := bot.Bot.ListingWithParams("/r/"+sub+query, params)
+func (bot RedditBot) GetPosts(Digest Digest, choice string) (Posts, error) {
+	query, daysOld, params := PickParams(choice)
+	harvest, err := bot.Bot.ListingWithParams("/r/"+Digest.Subreddit+query, params)
 	if err != nil {
-		return Posts{[]reddit.Post{}}, err
+		return Posts{}, err
 	}
 
-	var results []reddit.Post
+	var results Posts
 
 	counter := 0
 	for _, post := range harvest.Posts {
-		//skips posts if they're older than a day
-		if time.Unix(int64(post.CreatedUTC), 0).Before(time.Now().AddDate(0, 0, daysOld*-1)) {
+		Post := Post{*post}
+
+		if Post.isOlderThan(daysOld) {
 			continue
 		}
-		results = append(results, *post)
+		results.append(Post)
 		counter++
-		if counter >= limit {
+		if counter >= Digest.NumPosts {
 			break
 		}
 	}
-	return Posts{results}, nil
+	return results, nil
 }
 
-type PostsGetter func(Digest) (Posts, error)
-
-func (bot RedditBot) GetMonthlyPosts(Digest Digest) (Posts, error) {
-	m := make(map[string]string)
-	m["t"] = "month"
-	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "/top", 30, m)
-}
-
-func (bot RedditBot) GetWeeklyPosts(Digest Digest) (Posts, error) {
-	m := make(map[string]string)
-	m["t"] = "week"
-	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "/top", 7, m)
-}
-
-func (bot RedditBot) GetDailyPosts(Digest Digest) (Posts, error) {
-	m := make(map[string]string)
-	return bot.GetPostsForSub(Digest.Subreddit, Digest.NumPosts, "", 1, m)
+func PickParams(choice string) (query string, daysOld int, params map[string]string) {
+	params = make(map[string]string)
+	switch choice {
+	case "Today":
+		query = ""
+		daysOld = 1
+	case "Week":
+		query = "/top"
+		daysOld = 7
+		params["t"] = "week"
+	case "Month":
+		query = "/top"
+		daysOld = 30
+		params["t"] = "month"
+	}
+	return
 }
