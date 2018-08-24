@@ -2,58 +2,57 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
-type DigestWriter struct {
+type EmailWriter struct {
 	Email     string
 	redditBot RedditBot
 	config    Config
 }
 
 func WriteEmail(redditBot RedditBot, config Config) error {
-	DigestWriter := DigestWriter{"", redditBot, config}
+	EmailWriter := EmailWriter{"", redditBot, config}
 
-	DigestWriter.writeHeader()
+	EmailWriter.writeHeader()
 
-	err := DigestWriter.writeDigest("Today")
+	err := EmailWriter.writeSecton("Today")
 	if err != nil {
 		return err
 	}
 
-	DigestWriter.writeSpacer()
+	EmailWriter.writeSpacer()
 
-	if DigestWriter.isWeeklyWeekday() {
-		err := DigestWriter.writeDigest("Week")
+	if EmailWriter.isWeeklyWeekday() {
+		err := EmailWriter.writeSecton("Week")
 		if err != nil {
 			return err
 		}
 
 	}
 
-	DigestWriter.writeSpacer()
+	EmailWriter.writeSpacer()
 
-	if DigestWriter.isMonthlyDay() {
-		err := DigestWriter.writeDigest("Month")
+	if EmailWriter.isMonthlyDay() {
+		err := EmailWriter.writeSecton("Month")
 		if err != nil {
 			return err
 		}
 	}
 
-	DigestWriter.writeFooter()
+	EmailWriter.writeFooter()
 
-	return DigestWriter.send()
+	return EmailWriter.send()
 
 }
 
-func (DigestWriter *DigestWriter) writeDigest(Choice string) error {
+func (EmailWriter *EmailWriter) writeSecton(Choice string) error {
 	var Result string
 
-	for _, Digest := range DigestWriter.getDigests(Choice) {
+	for _, Digest := range EmailWriter.getDigests(Choice) {
 		Result += Digest.headline(Choice)
 
-		Digest.populatePosts(DigestWriter.redditBot, Choice)
+		Digest.populatePosts(EmailWriter.redditBot, Choice)
 
 		FormattedPosts, err := Digest.toString()
 		if err != nil {
@@ -62,48 +61,44 @@ func (DigestWriter *DigestWriter) writeDigest(Choice string) error {
 		Result += FormattedPosts
 	}
 
-	DigestWriter.Email += Result
+	EmailWriter.Email += Result
 	return nil
 }
 
-func (DigestWriter DigestWriter) getDigests(Choice string) []Digest {
+func (EmailWriter EmailWriter) getDigests(Choice string) []Digest {
 	switch Choice {
 	case "Today":
-		return DigestWriter.config.DailyDigests
+		return EmailWriter.config.DailyDigests
 	case "Week":
-		return DigestWriter.config.WeeklyDigests
+		return EmailWriter.config.WeeklyDigests
 	case "Month":
-		return DigestWriter.config.DailyDigests
+		return EmailWriter.config.DailyDigests
 	}
 	panic(errors.New("unknown choice"))
 }
 
-func (DigestWriter *DigestWriter) isMonthlyDay() bool {
-	return time.Now().Day() == DigestWriter.config.MonthlyDay
+func (EmailWriter *EmailWriter) isMonthlyDay() bool {
+	return time.Now().Day() == EmailWriter.config.MonthlyDay
 }
 
-func (DigestWriter *DigestWriter) isWeeklyWeekday() bool {
+func (EmailWriter *EmailWriter) isWeeklyWeekday() bool {
 	weekday := DayOfTheWeek()
-	return weekday == DigestWriter.config.WeeklyWeekday
+	return weekday == EmailWriter.config.WeeklyWeekday
 }
 
-func (DigestWriter *DigestWriter) send() error {
-	request := EmailRequest{"", DigestWriter.config.UserEmail, "Reddit Digest for " + DayOfTheWeek(), DigestWriter.Email, []string{}}
-	return DigestWriter.config.EmailerConfig.Email(request)
+func (EmailWriter *EmailWriter) send() error {
+	request := EmailRequest{"", EmailWriter.config.UserEmail, "Reddit Digest for " + DayOfTheWeek(), EmailWriter.Email, []string{}}
+	return EmailWriter.config.EmailerConfig.Email(request)
 }
 
-func (Digest Digest) headline(Unit string) string {
-	return fmt.Sprintf(`<br></br> <h2>This %v's %v Posts from /r/%v </h2>`, Unit, Digest.NumPosts, Digest.Subreddit)
+func (EmailWriter *EmailWriter) writeHeader() {
+	EmailWriter.Email += `<h1>Email Digest for you!</H1> <br></br>`
 }
 
-func (DigestWriter *DigestWriter) writeHeader() {
-	DigestWriter.Email += `<h1>Email Digest for you!</H1> <br></br>`
+func (EmailWriter *EmailWriter) writeFooter() {
+	EmailWriter.Email += "<br></br><br></br>Stay cool <br></br> -RedditDigest Bot"
 }
 
-func (DigestWriter *DigestWriter) writeFooter() {
-	DigestWriter.Email += "<br></br><br></br>Stay cool <br></br> -RedditDigest Bot"
-}
-
-func (DigestWriter *DigestWriter) writeSpacer() {
-	DigestWriter.Email += "<br></br><br><hr></hr><hr></hr>"
+func (EmailWriter *EmailWriter) writeSpacer() {
+	EmailWriter.Email += "<br></br><br><hr></hr><hr></hr>"
 }
