@@ -5,7 +5,7 @@ import (
 )
 
 type RedditBot struct {
-	Bot reddit.Bot
+	reddit.Bot
 }
 
 func InitReddit(data RedditData) (RedditBot, error) {
@@ -21,14 +21,14 @@ func InitReddit(data RedditData) (RedditBot, error) {
 
 func (bot RedditBot) GetPosts(Digest Digest, choice string) (Posts, error) {
 	query, daysOld, params := PickParams(choice)
-	harvest, err := bot.Bot.ListingWithParams("/r/"+Digest.Subreddit+query, params)
+	harvest, err := bot.ListingWithParams("/r/"+Digest.Subreddit+query, params)
 	if err != nil {
 		return Posts{}, err
 	}
 
 	var results Posts
-
 	counter := 0
+
 	for _, post := range harvest.Posts {
 		Post := Post{*post}
 

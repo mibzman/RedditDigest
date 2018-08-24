@@ -26,7 +26,6 @@ func (Posts *Posts) append(post Post) {
 func (Posts Posts) toString() (string, error) {
 	var Result string
 	for _, Post := range Posts.list {
-		// Post := Post{post}
 		PostContent, err := Post.toString()
 		if err != nil {
 			return "", err
