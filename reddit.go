@@ -44,8 +44,6 @@ func (bot RedditBot) GetPostsForSub(sub string, limit int, query string, daysOld
 
 	var results []reddit.Post
 
-	// [:limit*2]
-
 	counter := 0
 	for _, post := range harvest.Posts {
 		//skips posts if they're older than a day
@@ -78,7 +76,20 @@ func (bot RedditBot) GetDailyPostsForSub(sub string, limit int) ([]reddit.Post, 
 	return bot.GetPostsForSub(sub, limit, "", 1, m)
 }
 
-func GeneratePostEmailContent(post reddit.Post) (result string, err error) {
+func (DigestWriter DigestWriter) postsToString(Posts []reddit.Post) (string, error) {
+	var Result string
+	for _, post := range Posts {
+		PostContent, err := DigestWriter.generatePostEmailContent(post)
+		if err != nil {
+			return "", err
+		}
+
+		Result += PostContent
+	}
+	return Result, nil
+}
+
+func (DigestWriter DigestWriter) generatePostEmailContent(post reddit.Post) (result string, err error) {
 	if post.IsSelf {
 		result += fmt.Sprintf(`<h3>%v</h3>`, post.Title)
 		result += fmt.Sprintf(`%v<br></br>`, post.SelfTextHTML)

@@ -1,6 +1,10 @@
 package main
 
-import gomail "gopkg.in/gomail.v2"
+import (
+	"time"
+
+	gomail "gopkg.in/gomail.v2"
+)
 
 type EmailRequest struct {
 	ReplyTo  string
@@ -25,4 +29,8 @@ func (config EmailerConfig) Email(request EmailRequest) error {
 	d := gomail.NewDialer(config.URL, 587, config.SendingAddress, config.SendingPassword)
 
 	return d.DialAndSend(m)
+}
+
+func DayOfTheWeek() string {
+	return time.Now().Weekday().String()
 }
