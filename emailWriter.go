@@ -1,9 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"time"
-
-	"github.com/turnage/graw/reddit"
 )
 
 type DigestWriter struct {
@@ -47,119 +46,97 @@ func WriteEmail(redditBot RedditBot, config Config) error {
 
 }
 
-func (DigestWriter DigestWriter) send() error {
-	request := EmailRequest{"", DigestWriter.config.UserEmail, "Reddit Digest for " + DayOfTheWeek(), DigestWriter.Email, []string{}}
-	return DigestWriter.config.EmailerConfig.Email(request)
-}
-
-func (DigestWriter DigestWriter) writeDailyDigests() error {
-	// var Result string
-	// for _, Digest := range DigestWriter.config.DailyDigests {
-	// 	Posts, err := DigestWriter.redditBot.GetDailyPosts(Digest)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	Result += DigestWriter.headline("Today", Digest)
-
-	// 	FormattedPosts, err := DigestWriter.postsToString(Posts)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Result += FormattedPosts
-	// }
-
-	// DigestWriter.Email += Result
-	// return nil
-	return DigestWriter.writeDigests(DigestWriter.redditBot.GetDailyPosts, "Today")
-}
-
-func (DigestWriter DigestWriter) writeWeeklyDigests() error {
-	// var Result string
-
-	// for _, Digest := range DigestWriter.config.WeeklyDigests {
-	// 	Posts, err := DigestWriter.redditBot.GetWeeklyPosts(Digest)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	Result += DigestWriter.headline("Week", Digest)
-
-	// 	FormattedPosts, err := DigestWriter.postsToString(Posts)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Result += FormattedPosts
-	// }
-
-	// DigestWriter.Email += Result
-	// return nil
-	return DigestWriter.writeDigests(DigestWriter.redditBot.GetWeeklyPosts, "Week")
-}
-
-func (DigestWriter DigestWriter) writeMonthlyDigests() error {
-	// var Result string
-
-	// for _, Digest := range DigestWriter.config.MonthlyDigests {
-	// 	Posts, err := DigestWriter.redditBot.GetMonthlyPosts(Digest)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	Result += DigestWriter.headline("Month", Digest)
-
-	// 	FormattedPosts, err := DigestWriter.postsToString(Posts)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	Result += FormattedPosts
-	// }
-
-	// DigestWriter.Email += Result
-	// return nil
-
-	return DigestWriter.writeDigests(DigestWriter.redditBot.GetMonthlyPosts, "Month")
-}
-
-type PostGetter func(Digest) ([]reddit.Post, error)
-
-func (DigestWriter DigestWriter) writeDigests(postGetter PostGetter, Headline string) error {
+func (DigestWriter *DigestWriter) writeDailyDigests() error {
 	var Result string
-
-	for _, Digest := range DigestWriter.config.MonthlyDigests {
-		FormattedDigest, err := DigestWriter.formatDigest(postGetter, Headline, Digest)
+	for _, Digest := range DigestWriter.config.DailyDigests {
+		Posts, err := DigestWriter.redditBot.GetDailyPosts(Digest)
 		if err != nil {
 			return err
 		}
-		Result += FormattedDigest
+
+		Result += DigestWriter.headline(DayOfTheWeek(), Digest)
+
+		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		if err != nil {
+			return err
+		}
+		Result += FormattedPosts
 	}
 
 	DigestWriter.Email += Result
 	return nil
 }
 
-func (DigestWriter DigestWriter) formatDigest(postGetter PostGetter, Headline string, Digest Digest) (string, error) {
-	Result := DigestWriter.headline(Headline, Digest)
+func (DigestWriter *DigestWriter) writeWeeklyDigests() error {
+	var Result string
 
-	Posts, err := postGetter(Digest)
-	if err != nil {
-		return "", err
+	for _, Digest := range DigestWriter.config.WeeklyDigests {
+		Posts, err := DigestWriter.redditBot.GetWeeklyPosts(Digest)
+		if err != nil {
+			return err
+		}
+
+		Result += DigestWriter.headline("Week", Digest)
+
+		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		if err != nil {
+			return err
+		}
+		Result += FormattedPosts
 	}
 
-	FormattedPosts, err := DigestWriter.postsToString(Posts)
-	if err != nil {
-		return "", err
-	}
-	Result += FormattedPosts
-	return Result, nil
-
+	DigestWriter.Email += Result
+	return nil
 }
 
-func (DigestWriter DigestWriter) isMonthlyDay() bool {
+func (DigestWriter *DigestWriter) writeMonthlyDigests() error {
+	var Result string
+
+	for _, Digest := range DigestWriter.config.MonthlyDigests {
+		Posts, err := DigestWriter.redditBot.GetMonthlyPosts(Digest)
+		if err != nil {
+			return err
+		}
+
+		Result += DigestWriter.headline("Month", Digest)
+
+		FormattedPosts, err := DigestWriter.postsToString(Posts)
+		if err != nil {
+			return err
+		}
+		Result += FormattedPosts
+	}
+
+	DigestWriter.Email += Result
+	return nil
+}
+
+func (DigestWriter *DigestWriter) isMonthlyDay() bool {
 	return time.Now().Day() == DigestWriter.config.MonthlyDay
 }
 
-func (DigestWriter DigestWriter) isWeeklyWeekday() bool {
+func (DigestWriter *DigestWriter) isWeeklyWeekday() bool {
 	weekday := DayOfTheWeek()
 	return weekday == DigestWriter.config.WeeklyWeekday
+}
+
+func (DigestWriter *DigestWriter) send() error {
+	request := EmailRequest{"", DigestWriter.config.UserEmail, "Reddit Digest for " + DayOfTheWeek(), DigestWriter.Email, []string{}}
+	return DigestWriter.config.EmailerConfig.Email(request)
+}
+
+func (DigestWriter *DigestWriter) headline(Unit string, Digest Digest) string {
+	return fmt.Sprintf(`<br></br> <h2>This %v's %v Posts from /r/%v </h2>`, Unit, Digest.NumPosts, Digest.Subreddit)
+}
+
+func (DigestWriter *DigestWriter) writeHeader() {
+	DigestWriter.Email += `<h1>Email Digest for you!</H1> <br></br>`
+}
+
+func (DigestWriter *DigestWriter) writeFooter() {
+	DigestWriter.Email += "<br></br><br></br>Stay cool <br></br> -RedditDigest Bot"
+}
+
+func (DigestWriter *DigestWriter) writeSpacer() {
+	DigestWriter.Email += "<br></br><br><hr></hr><hr></hr>"
 }
