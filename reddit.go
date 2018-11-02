@@ -35,6 +35,7 @@ func (bot RedditBot) GetPosts(Digest Digest, choice string) (Posts, error) {
 		if Post.isOlderThan(daysOld) {
 			continue
 		}
+
 		results.append(Post)
 		counter++
 		if counter >= Digest.NumPosts {

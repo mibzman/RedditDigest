@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -61,4 +63,25 @@ username: "` + data.Username + `"
 password: "` + data.Password + `"`)
 
 	return nil
+}
+
+func (Config Config) getDigests(Choice string) []Digest {
+	switch Choice {
+	case "Today":
+		return Config.DailyDigests
+	case "Week":
+		return Config.WeeklyDigests
+	case "Month":
+		return Config.MonthlyDigests
+	}
+	panic(errors.New("unknown choice"))
+}
+
+func (Config *Config) isMonthlyDay() bool {
+	return time.Now().Day() == Config.MonthlyDay
+}
+
+func (Config *Config) isWeeklyWeekday() bool {
+	weekday := DayOfTheWeek()
+	return weekday == Config.WeeklyWeekday
 }

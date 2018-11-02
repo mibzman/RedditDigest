@@ -1,10 +1,5 @@
 package main
 
-import (
-	"errors"
-	"time"
-)
-
 type EmailWriter struct {
 	Email     string
 	redditBot RedditBot
@@ -21,9 +16,9 @@ func WriteEmail(redditBot RedditBot, config Config) error {
 		return err
 	}
 
-	EmailWriter.writeSpacer()
+	if EmailWriter.config.isWeeklyWeekday() {
+		EmailWriter.writeSpacer()
 
-	if EmailWriter.isWeeklyWeekday() {
 		err := EmailWriter.writeSecton("Week")
 		if err != nil {
 			return err
@@ -31,9 +26,9 @@ func WriteEmail(redditBot RedditBot, config Config) error {
 
 	}
 
-	EmailWriter.writeSpacer()
+	if EmailWriter.config.isMonthlyDay() {
+		EmailWriter.writeSpacer()
 
-	if EmailWriter.isMonthlyDay() {
 		err := EmailWriter.writeSecton("Month")
 		if err != nil {
 			return err
@@ -49,7 +44,7 @@ func WriteEmail(redditBot RedditBot, config Config) error {
 func (EmailWriter *EmailWriter) writeSecton(Choice string) error {
 	var Result string
 
-	for _, Digest := range EmailWriter.getDigests(Choice) {
+	for _, Digest := range EmailWriter.config.getDigests(Choice) {
 		Result += Digest.headline(Choice)
 
 		Digest.populatePosts(EmailWriter.redditBot, Choice)
@@ -63,27 +58,6 @@ func (EmailWriter *EmailWriter) writeSecton(Choice string) error {
 
 	EmailWriter.Email += Result
 	return nil
-}
-
-func (EmailWriter EmailWriter) getDigests(Choice string) []Digest {
-	switch Choice {
-	case "Today":
-		return EmailWriter.config.DailyDigests
-	case "Week":
-		return EmailWriter.config.WeeklyDigests
-	case "Month":
-		return EmailWriter.config.DailyDigests
-	}
-	panic(errors.New("unknown choice"))
-}
-
-func (EmailWriter *EmailWriter) isMonthlyDay() bool {
-	return time.Now().Day() == EmailWriter.config.MonthlyDay
-}
-
-func (EmailWriter *EmailWriter) isWeeklyWeekday() bool {
-	weekday := DayOfTheWeek()
-	return weekday == EmailWriter.config.WeeklyWeekday
 }
 
 func (EmailWriter *EmailWriter) send() error {

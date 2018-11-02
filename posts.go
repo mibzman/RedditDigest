@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -21,6 +22,10 @@ func (Posts *Posts) append(post Post) {
 	} else {
 		Posts.list = append(Posts.list, post)
 	}
+}
+
+func (Posts *Posts) MarshalJSON() ([]byte, error) {
+	return json.Marshal(Posts.list)
 }
 
 func (Posts Posts) toString() (string, error) {
@@ -51,11 +56,24 @@ func (Post Post) toString() (result string, err error) {
 	return
 }
 
+func (Post *Post) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&struct {
+		Title        string
+		SelfTextHTML string
+		URL          string
+	}{
+		Title:        Post.Title,
+		SelfTextHTML: Post.SelfTextHTML,
+		URL:          Post.URL,
+	})
+}
+
 func (Post Post) isImage() bool {
 	FileExtension := Post.URL[len(Post.URL)-3:]
 	return FileExtension == "jpg" || FileExtension == "png"
 }
 
 func (Post Post) isOlderThan(daysOld int) bool {
-	return time.Unix(int64(Post.CreatedUTC), 0).Before(time.Now().AddDate(0, 0, daysOld*-1))
+	return time.Unix(int64(Post.CreatedUTC), 0).
+		Before(time.Now().AddDate(0, 0, daysOld*-1))
 }
