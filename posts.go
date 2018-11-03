@@ -41,6 +41,10 @@ func (Posts Posts) toString() (string, error) {
 	return Result, nil
 }
 
+func (Posts Posts) toArray() []Post {
+	return Posts.list
+}
+
 func (Post Post) toString() (result string, err error) {
 	if Post.IsSelf { //is a self post
 		result += fmt.Sprintf(`<h3>%v</h3>`, Post.Title)
@@ -61,10 +65,12 @@ func (Post *Post) MarshalJSON() ([]byte, error) {
 		Title        string
 		SelfTextHTML string
 		URL          string
+		IsSelf       bool
 	}{
 		Title:        Post.Title,
 		SelfTextHTML: Post.SelfTextHTML,
 		URL:          Post.URL,
+		IsSelf:       Post.IsSelf,
 	})
 }
 

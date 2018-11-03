@@ -21,12 +21,19 @@ func (APIManager APIManager) RedditHandler(w http.ResponseWriter, r *http.Reques
 	Choice := "Today"
 	Digests := APIManager.config.getDigests(Choice)
 
-	for idx, _ := range Digests {
-		Digests[idx].populatePosts(APIManager.redditBot, Choice)
-
+	var Posts []Post
+	for _, Digest := range Digests {
+		Digest.populatePosts(APIManager.redditBot, Choice)
+		Posts = append(Posts, Digest.Posts.toArray()...)
 	}
 
-	WriteJSONResponse(w, Digests)
+	encoder := json.NewEncoder(w)
+	err := encoder.Encode(Posts)
+	if err != nil {
+		w.Write([]byte("Failed to encode json:" + err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func WriteJSONResponse(w http.ResponseWriter, Data ...interface{}) {

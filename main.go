@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -43,14 +44,22 @@ func Serve(Filename string) error {
 		return err
 	}
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // "http://localhost:3000", "http://localhost:4200"
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"*"}, //Authorization
+	})
+
 	mx := mux.NewRouter()
 
 	APIManager := APIManager{mx, config, redditBot}
 	APIManager.AddRoutes()
 
+	handler := c.Handler(mx)
+
 	fmt.Println("server is serving")
-	fmt.Print(http.ListenAndServe(":"+"8080", mx))
-	fmt.Print(http.ListenAndServe(":"+os.Getenv("PORT"), mx))
+	// fmt.Print(http.ListenAndServe(":"+"8081", handler))
+	fmt.Print(http.ListenAndServe(":"+os.Getenv("PORT"), handler))
 	return nil
 }
 
