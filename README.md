@@ -26,3 +26,7 @@ The intent is for the program to be run once a day, it will not self-schedule at
 *   EmailerConfig: Something to send emails, probably gmail
 *   WeeklyWeekday: The day of the week on which to send the weekly portion of the digest
 *   MonthlyDay: The day of the month on which to send the monthly portion of the digest
+
+### ToDo:
+
+-   Convert custom json file configs with .env
