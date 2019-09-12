@@ -29,4 +29,4 @@ The intent is for the program to be run once a day, it will not self-schedule at
 
 ### ToDo:
 
--   Convert custom json file configs with .env
+-   Convert custom json file configs to .env
