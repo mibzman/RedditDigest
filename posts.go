@@ -66,17 +66,21 @@ func (Post *Post) MarshalJSON() ([]byte, error) {
 		SelfTextHTML string
 		URL          string
 		IsSelf       bool
+		CreatedUTC   uint64
+		ID           string
 	}{
 		Title:        Post.Title,
 		SelfTextHTML: Post.SelfTextHTML,
 		URL:          Post.URL,
 		IsSelf:       Post.IsSelf,
+		CreatedUTC:   Post.CreatedUTC,
+		ID:           Post.ID,
 	})
 }
 
 func (Post Post) isImage() bool {
 	FileExtension := Post.URL[len(Post.URL)-3:]
-	return FileExtension == "jpg" || FileExtension == "png"
+	return FileExtension == "jpg" || FileExtension == "png" || FileExtension == "jpeg" || FileExtension == "gif"
 }
 
 func (Post Post) isOlderThan(daysOld int) bool {

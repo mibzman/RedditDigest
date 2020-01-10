@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/jasonlvhit/gocron"
+  packages = ["."]
+  revision = "54194c9749d48b073c9aeb2c787b6882e95dd0cd"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
@@ -72,6 +78,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "59aad4f3e254fa8c0ed82f11af67a8ce80f100d3dd8dbc30d8d8ff5dee31b7b5"
+  inputs-digest = "f5eb8892d07b3da624ce81865047f0869183f126955dcbc25925c78686b1deeb"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -19,12 +21,22 @@ func RunActions() {
 	args := flag.Args()
 
 	var err error
-	if args[0] == "serve" {
-		err = Serve(args[1])
+	if args[0] == "" {
+
 	} else {
-		err = Run(args[0])
 
 	}
+
+	switch args[0] {
+	case "serve":
+		Dump(args[1])
+		err = Serve(args[1])
+	case "dump":
+		err = Dump(args[1])
+	default:
+		err = Run(args[0])
+	}
+
 	if err != nil {
 		panic(err)
 	}
@@ -36,6 +48,33 @@ func Run(Filename string) error {
 		return err
 	}
 	return WriteEmail(redditBot, config)
+}
+
+func Dump(Filename string) error {
+	config, redditBot, err := InitStuff(Filename)
+	if err != nil {
+		return err
+	}
+	Posts := GetTodaysPostsMain(redditBot, config)
+
+	json, err := json.Marshal(Posts)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return ioutil.WriteFile("./dump", []byte(json), 0644)
+}
+
+func GetTodaysPostsMain(redditBot RedditBot, config Config) []Post {
+	Choice := "Today"
+	Digests := config.getDigests(Choice)
+
+	var Posts []Post
+	for _, Digest := range Digests {
+		Digest.populatePosts(redditBot, Choice)
+		Posts = append(Posts, Digest.Posts.toArray()...)
+	}
+	return Posts
 }
 
 func Serve(Filename string) error {
@@ -57,9 +96,11 @@ func Serve(Filename string) error {
 
 	handler := c.Handler(mx)
 
-	fmt.Println("server is serving")
+	port := os.Getenv("PORT")
+
+	fmt.Println("server is serving on ", port)
 	// fmt.Print(http.ListenAndServe(":"+"8081", handler))
-	fmt.Print(http.ListenAndServe(":"+os.Getenv("PORT"), handler))
+	fmt.Print(http.ListenAndServe(":"+port, handler))
 	return nil
 }
 
