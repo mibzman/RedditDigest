@@ -1,3 +1,5 @@
 *.config
 /RedditDigest
 /vendor
+dump
+scheduler-config.png
