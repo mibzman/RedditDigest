@@ -2,11 +2,17 @@
 
 ## A simple tool to not browse reddit all the time
 
-This tool sends some number of reddit posts from given subreddits at given intervals.
+This tool collects some number of reddit posts from given subreddits at given intervals.
 
 *   Hottest posts every day
 *   Top weekly every week
 *   Top monthly every month
+
+Posts can be delivered by:
+- Email to an address
+- an API
+- RSS
+
 
 ### Getting started:
 
@@ -17,7 +23,9 @@ This tool sends some number of reddit posts from given subreddits at given inter
 
 Running the program will send an email to your email address with the configured subs. If the system has an acurate clock, weekly and monthly content will be included on the days specefied.
 
-The intent is for the program to be run once a day, it will not self-schedule at this time
+The intent is for the email delivery program to be run once a day, it will not self-schedule at this time.
+
+For RSS and API, run with `./RedditDigest serve <your.config>`
 
 ### Config
 
